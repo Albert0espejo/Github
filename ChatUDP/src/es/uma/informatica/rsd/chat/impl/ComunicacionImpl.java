@@ -36,9 +36,9 @@ public class ComunicacionImpl implements Comunicacion {
 
 	@Override  //CAMBIAR EL IF DESPUES DEL TRY
 	public void runReceptor(){
-		byte[] aux = new byte[500];	
 		try {
 			while(true) {
+				byte[] aux = new byte[500];	
 				dp = new DatagramPacket(aux, aux.length);
 				ms.receive(dp);
 				String msj = new String(aux, "UTF-8");
@@ -49,14 +49,17 @@ public class ComunicacionImpl implements Comunicacion {
 					String nombre = sc.next();
 					String mensaje = sc.next();
 					sc.close();
-					if(nombre != alias) {
+					if(!(alias.equals(nombre))) {
 						controlador.mostrarMensaje(new InetSocketAddress(dp.getAddress(),dp.getPort()), nombre, mensaje);			
 					}
 				}else {
 					String nombre = sc.next();
 					String mensaje = sc.next();
 					sc.close();
-					if(nombre == alias) controlador.mostrarMensaje(new InetSocketAddress(dp.getAddress(),dp.getPort()), nombre, mensaje);
+					if(!(alias.equals(nombre))) {
+						controlador.mostrarMensaje(new InetSocketAddress(dp.getAddress(),dp.getPort()), nombre, mensaje);
+					}
+					
 				}
 			}
 		}catch(Exception e) {
