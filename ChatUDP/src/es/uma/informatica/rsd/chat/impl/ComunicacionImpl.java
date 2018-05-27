@@ -38,24 +38,26 @@ public class ComunicacionImpl implements Comunicacion {
 	public void runReceptor(){
 		byte[] aux = new byte[500];	
 		try {
-			dp = new DatagramPacket(aux, aux.length);
-			ms.receive(dp);
-			String msj = new String(aux, "UTF-8");
-			Scanner sc = new Scanner(msj);
-			sc.useDelimiter("!");
-			if(dp.getAddress().isMulticastAddress()) {
-				sc.next();
-				String nombre = sc.next();
-				String mensaje = sc.next();
-				sc.close();
-				if(nombre != alias) {
-					controlador.mostrarMensaje(new InetSocketAddress(dp.getAddress(),ms.getPort()), nombre, mensaje);			
+			while(true) {
+				dp = new DatagramPacket(aux, aux.length);
+				ms.receive(dp);
+				String msj = new String(aux, "UTF-8");
+				Scanner sc = new Scanner(msj);
+				sc.useDelimiter("!");
+				if(dp.getAddress().isMulticastAddress()) {
+					sc.next();
+					String nombre = sc.next();
+					String mensaje = sc.next();
+					sc.close();
+					if(nombre != alias) {
+						controlador.mostrarMensaje(new InetSocketAddress(dp.getAddress(),dp.getPort()), nombre, mensaje);			
+					}
+				}else {
+					String nombre = sc.next();
+					String mensaje = sc.next();
+					sc.close();
+					if(nombre == alias) controlador.mostrarMensaje(new InetSocketAddress(dp.getAddress(),dp.getPort()), nombre, mensaje);
 				}
-			}else {
-				String nombre = sc.next();
-				String mensaje = sc.next();
-				sc.close();
-				if(nombre != alias) controlador.mostrarMensaje(new InetSocketAddress(dp.getAddress(),ms.getPort()), nombre, mensaje);
 			}
 		}catch(Exception e) {
 			throw new RuntimeException("Error. No se ha producido el mensaje");
