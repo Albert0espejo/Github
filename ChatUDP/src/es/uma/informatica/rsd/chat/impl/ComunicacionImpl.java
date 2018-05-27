@@ -49,14 +49,14 @@ public class ComunicacionImpl implements Comunicacion {
 					String nombre = sc.next();
 					String mensaje = sc.next();
 					sc.close();
-					if(!(alias.equals(nombre))) {
+					if(alias.equals(nombre) == false) {
 						controlador.mostrarMensaje(new InetSocketAddress(dp.getAddress(),dp.getPort()), nombre, mensaje);			
 					}
 				}else {
 					String nombre = sc.next();
 					String mensaje = sc.next();
 					sc.close();
-					if(!(alias.equals(nombre))) {
+					if(alias.equals(nombre) == false) {
 						controlador.mostrarMensaje(new InetSocketAddress(dp.getAddress(),dp.getPort()), nombre, mensaje);
 					}
 					
