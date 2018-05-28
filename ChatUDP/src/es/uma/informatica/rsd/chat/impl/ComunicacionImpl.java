@@ -22,7 +22,6 @@ public class ComunicacionImpl implements Comunicacion {
 	public void crearSocket(PuertoAlias pa){
 		try {
 			ms = new MulticastSocket(pa.puerto);
-			ni = ms.getNetworkInterface();
 			alias = pa.alias;
 		}catch(Exception e) {
 			throw new RuntimeException("Error. Al crear el socket.");
@@ -132,7 +131,8 @@ public class ComunicacionImpl implements Comunicacion {
 	@Override
 	public void joinGroup(InetAddress multi){
 		try {
-			ms.joinGroup(new InetSocketAddress(multi, ia.getPort()), ni);
+			ms.setInterface(multi);
+			ms.joinGroup(new InetSocketAddress(multi, ia.getPort()), ms.getNetworkInterface());
 		}catch(Exception e) {
 			throw new RuntimeException("Error al uniser al grupo.");
 		}
@@ -141,7 +141,8 @@ public class ComunicacionImpl implements Comunicacion {
 	@Override
 	public void leaveGroup(InetAddress multi){
 		try {
-			ms.leaveGroup(new InetSocketAddress(multi, ia.getPort()), ni);
+			ms.setInterface(multi);
+			ms.leaveGroup(new InetSocketAddress(multi, ia.getPort()), ms.getNetworkInterface());
 			ms.close();
 		}catch(Exception e) {
 			throw new RuntimeException("Error al salirse del grupo.");
