@@ -1,6 +1,7 @@
 package es.uma.informatica.rsd.chat.impl;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.util.Scanner;
 
@@ -58,7 +59,6 @@ public class ComunicacionImpl implements Comunicacion {
 					if(alias.equals(nombre) == false) {
 						controlador.mostrarMensaje(new InetSocketAddress(dp.getAddress(),dp.getPort()), nombre, mensaje);
 					}
-					
 				}
 			}
 		}catch(Exception e) {
@@ -105,22 +105,26 @@ public class ComunicacionImpl implements Comunicacion {
 		}
 	}*/
 
+
+	
 	@Override
 	public void envia(InetSocketAddress sa, String mensaje){
 		if(sa.getAddress().isMulticastAddress()) {
 			String b = sa.getAddress().getHostAddress() + "!" + alias + "!" + mensaje;
-			byte[] buf = b.getBytes();
-			dp = new DatagramPacket(buf , buf.length, sa.getAddress(), sa.getPort());
+			byte[] buf = new byte[500];
 			try {
+				buf = b.getBytes("UTF-8");
+				dp = new DatagramPacket(buf , buf.length, sa.getAddress(), sa.getPort());
 				ms.send(dp);
 			} catch (IOException e) {
 				throw new RuntimeException("Error al enviar el mensaje");
 			}
 		}else {
 			String b = "!" + alias + "!" + mensaje;
-			byte[] buf = b.getBytes();
-			dp = new DatagramPacket(buf, buf.length, sa.getAddress(), sa.getPort());
+			byte[] buf = new byte[500];
 			try {
+				buf = b.getBytes("UTF-8");
+				dp = new DatagramPacket(buf, buf.length, sa.getAddress(), sa.getPort());
 				ms.send(dp);
 			} catch (IOException e) {
 				throw new RuntimeException("Error al enviar el mensaje");
