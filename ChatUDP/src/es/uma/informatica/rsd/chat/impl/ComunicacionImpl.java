@@ -40,7 +40,7 @@ public class ComunicacionImpl implements Comunicacion {
 				byte[] aux = new byte[500];	
 				dp = new DatagramPacket(aux, aux.length);
 				ms.receive(dp);
-				String msj = new String(aux, "UTF-8");
+				String msj = new String(dp.getData(), "UTF-8");
 				Scanner sc = new Scanner(msj);
 				sc.useDelimiter("!");
 				if(dp.getAddress().isMulticastAddress()) {
