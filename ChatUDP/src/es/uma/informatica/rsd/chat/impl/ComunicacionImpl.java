@@ -1,9 +1,8 @@
 package es.uma.informatica.rsd.chat.impl;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.*;
-import java.util.Scanner;
+import java.util.NoSuchElementException;
 
 import es.uma.informatica.rsd.chat.ifaces.Comunicacion;
 import es.uma.informatica.rsd.chat.ifaces.Controlador;
@@ -14,16 +13,17 @@ public class ComunicacionImpl implements Comunicacion {
 	public MulticastSocket ms;
 	public DatagramPacket dp;
 	public String alias;
+	public int puerto;
 	public Controlador controlador;
 	public NetworkInterface ni;
-	public InetSocketAddress ia;
 	
 	
 	@Override
 	public void crearSocket(PuertoAlias pa){
+		alias = pa.alias;
+		puerto = pa.puerto;
 		try {
-			ms = new MulticastSocket(pa.puerto);
-			alias = pa.alias;
+			ms = new MulticastSocket(puerto);
 		}catch(Exception e) {
 			throw new RuntimeException("Error. Al crear el socket.");
 		}
@@ -42,27 +42,21 @@ public class ComunicacionImpl implements Comunicacion {
 				dp = new DatagramPacket(aux, aux.length);
 				ms.receive(dp);
 				String msj = new String(dp.getData(), "UTF-8");
-				Scanner sc = new Scanner(msj);
-				sc.useDelimiter("!");
-				if(dp.getAddress().isMulticastAddress()) {
-					sc.next();
-					String nombre = sc.next();
-					String mensaje = sc.next();
-					sc.close();
-					if(alias.equals(nombre) == false) {
-						controlador.mostrarMensaje(new InetSocketAddress(dp.getAddress(),dp.getPort()), nombre, mensaje);			
-					}
-				}else {
-					String nombre = sc.next();
-					String mensaje = sc.next();
-					sc.close();
-					if(alias.equals(nombre) == false) {
-						controlador.mostrarMensaje(new InetSocketAddress(dp.getAddress(),dp.getPort()), nombre, mensaje);
+				String[] sc = msj.split("!"); 
+				if(!(alias.equals(sc[1]))) {
+					if(sc[0].isEmpty()) {
+						controlador.mostrarMensaje(new InetSocketAddress(dp.getAddress(),dp.getPort()), sc[1], sc[2]);			
+					}else {
+						controlador.mostrarMensaje(new InetSocketAddress(dp.getAddress(),dp.getPort()), sc[1], sc[2]);			
 					}
 				}
 			}
-		}catch(Exception e) {
-			throw new RuntimeException("Error. No se ha producido el mensaje");
+		}catch(NoSuchElementException e) {
+			System.err.print("Error en la introduccion de datos.");
+		}catch(SocketException e) {
+			System.err.print("Error en recibir mensaje");
+		}catch(IOException e) {
+			System.err.print("Error general");
 		}
 	}
 	
@@ -110,7 +104,7 @@ public class ComunicacionImpl implements Comunicacion {
 	@Override
 	public void envia(InetSocketAddress sa, String mensaje){
 		if(sa.getAddress().isMulticastAddress()) {
-			String b = sa.getAddress().getHostAddress() + "!" + alias + "!" + mensaje;
+			String b = sa.getAddress() + "!" + alias + "!" + mensaje;
 			byte[] buf = new byte[500];
 			try {
 				buf = b.getBytes("UTF-8");
@@ -135,21 +129,19 @@ public class ComunicacionImpl implements Comunicacion {
 	@Override
 	public void joinGroup(InetAddress multi){
 		try {
-			ms.setInterface(multi);
-			ms.joinGroup(new InetSocketAddress(multi, ia.getPort()), ms.getNetworkInterface());
-		}catch(Exception e) {
-			throw new RuntimeException("Error al uniser al grupo.");
+			ms.joinGroup(new InetSocketAddress(multi, ms.getLocalPort()), NetworkInterface.getByName("192.168.245.59"));
+		}catch(IOException e) {
+			System.err.println("Error al uniser al grupo.");
 		}
 	}
 
 	@Override
 	public void leaveGroup(InetAddress multi){
 		try {
-			ms.setInterface(multi);
-			ms.leaveGroup(new InetSocketAddress(multi, ia.getPort()), ms.getNetworkInterface());
+			ms.leaveGroup(multi);
 			ms.close();
-		}catch(Exception e) {
-			throw new RuntimeException("Error al salirse del grupo.");
+		}catch(IOException e) {
+			System.err.println("Error al uniser al grupo.");
 		}
 	}
 
