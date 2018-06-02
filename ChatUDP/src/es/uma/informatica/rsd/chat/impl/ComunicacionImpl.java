@@ -42,9 +42,10 @@ public class ComunicacionImpl implements Comunicacion {
 				byte[] aux = new byte[500];	
 				dp = new DatagramPacket(aux, aux.length);
 				ms.receive(dp);
-				String msj = new String(dp.getData(),Charset.forName("UTF-8"));
-				System.out.println(msj);
+				
+				String msj = new String(dp.getData(),"UTF-8");
 				String[] sc = msj.split("!"); 
+				
 				if(sc[0].isEmpty()) {//unicast
 					if(sc[1]!=alias) {
 						System.out.println("No es mi mensaje");
