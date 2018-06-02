@@ -47,6 +47,16 @@ public class ComunicacionImpl implements Comunicacion {
 				String[] sc = msj.split("!"); 
 				
 				if(sc[0].isEmpty()) {//unicast
+					controlador.mostrarMensaje(new InetSocketAddress(dp.getAddress(), dp.getPort()), sc[1], sc[2]);
+				}else {//multicast
+					InetAddress dirReal = InetAddress.getByName(sc[0]);
+					if(NetworkInterface.getByInetAddress(dp.getAddress())==null) {
+						System.out.println("No es mi mensaje");
+						controlador.mostrarMensaje(new InetSocketAddress(dirReal, dp.getPort()), sc[1], sc[2]);
+					}
+				}
+				
+				/*if(sc[0].isEmpty()) {//unicast
 					if(!(sc[1].equals(alias))) {
 						System.out.println("No es mi mensaje");
 						controlador.mostrarMensaje(new InetSocketAddress(dp.getAddress(), dp.getPort()), sc[1], sc[2]);
@@ -57,7 +67,7 @@ public class ComunicacionImpl implements Comunicacion {
 						System.out.println("No es mi mensaje");
 						controlador.mostrarMensaje(new InetSocketAddress(dirReal, dp.getPort()), sc[1], sc[2]);
 					}
-				}
+				}*/
 			}
 		}catch(NoSuchElementException e) {
 			System.err.print("Error en la introduccion de datos.");
