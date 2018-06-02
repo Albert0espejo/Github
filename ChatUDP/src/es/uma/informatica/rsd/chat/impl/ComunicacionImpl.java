@@ -2,6 +2,7 @@ package es.uma.informatica.rsd.chat.impl;
 
 import java.io.IOException;
 import java.net.*;
+import java.nio.charset.Charset;
 import java.util.NoSuchElementException;
 
 import es.uma.informatica.rsd.chat.ifaces.Comunicacion;
@@ -41,13 +42,16 @@ public class ComunicacionImpl implements Comunicacion {
 				byte[] aux = new byte[500];	
 				dp = new DatagramPacket(aux, aux.length);
 				ms.receive(dp);
-				String msj = new String(dp.getData(), "UTF-8");
+				String msj = new String(dp.getData(),Charset.forName("UTF-8"));
+				System.out.println(msj);
 				String[] sc = msj.split("!"); 
-				if(!(alias.equals(sc[1]))) {
-					if(sc[0].isEmpty()) {
-						controlador.mostrarMensaje(new InetSocketAddress(dp.getAddress(),dp.getPort()), sc[1], sc[2]);			
-					}else {
-						controlador.mostrarMensaje(new InetSocketAddress(dp.getAddress(),dp.getPort()), sc[1], sc[2]);			
+				if(sc[0].isEmpty()) {//unicast
+					controlador.mostrarMensaje(new InetSocketAddress(dp.getAddress(), dp.getPort()), sc[1], sc[2]);
+				}else {//multicast
+					InetAddress dirReal = InetAddress.getByName(sc[0]);
+					if(sc[1]!=alias) {
+						System.out.println("No es mi mensaje");
+						controlador.mostrarMensaje(new InetSocketAddress(dirReal, dp.getPort()), sc[1], sc[2]);
 					}
 				}
 			}
@@ -105,11 +109,14 @@ public class ComunicacionImpl implements Comunicacion {
 	public void envia(InetSocketAddress sa, String mensaje){
 		if(sa.getAddress().isMulticastAddress()) {
 			String b = sa.getAddress() + "!" + alias + "!" + mensaje;
+			String[] line2 = b.split("/");
 			byte[] buf = new byte[500];
+			b = line2[1];
 			try {
 				buf = b.getBytes("UTF-8");
 				dp = new DatagramPacket(buf , buf.length, sa.getAddress(), sa.getPort());
 				ms.send(dp);
+				System.out.println(b);
 			} catch (IOException e) {
 				throw new RuntimeException("Error al enviar el mensaje");
 			}
@@ -120,6 +127,7 @@ public class ComunicacionImpl implements Comunicacion {
 				buf = b.getBytes("UTF-8");
 				dp = new DatagramPacket(buf, buf.length, sa.getAddress(), sa.getPort());
 				ms.send(dp);
+				System.out.println(b);
 			} catch (IOException e) {
 				throw new RuntimeException("Error al enviar el mensaje");
 			}
