@@ -46,7 +46,10 @@ public class ComunicacionImpl implements Comunicacion {
 				System.out.println(msj);
 				String[] sc = msj.split("!"); 
 				if(sc[0].isEmpty()) {//unicast
-					controlador.mostrarMensaje(new InetSocketAddress(dp.getAddress(), dp.getPort()), sc[1], sc[2]);
+					if(sc[1]!=alias) {
+						System.out.println("No es mi mensaje");
+						controlador.mostrarMensaje(new InetSocketAddress(dp.getAddress(), dp.getPort()), sc[1], sc[2]);
+					}
 				}else {//multicast
 					InetAddress dirReal = InetAddress.getByName(sc[0]);
 					if(sc[1]!=alias) {
@@ -109,9 +112,9 @@ public class ComunicacionImpl implements Comunicacion {
 	public void envia(InetSocketAddress sa, String mensaje){
 		if(sa.getAddress().isMulticastAddress()) {
 			String b = sa.getAddress() + "!" + alias + "!" + mensaje;
-			String[] line2 = b.split("/");
+			String[] line = b.split("/");
 			byte[] buf = new byte[500];
-			b = line2[1];
+			b = line[1];
 			try {
 				buf = b.getBytes("UTF-8");
 				dp = new DatagramPacket(buf , buf.length, sa.getAddress(), sa.getPort());
